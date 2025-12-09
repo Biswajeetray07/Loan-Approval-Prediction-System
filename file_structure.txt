@@ -1,0 +1,92 @@
+loan-approval-system/
+├── README.md
+├── LICENSE
+├── pyproject.toml / requirements.txt
+├── setup.cfg (optional)
+├── .gitignore
+├── .env.example
+├── docker-compose.yml
+├── Dockerfile
+├── k8s/                          # Kubernetes manifests (optional)
+├── infra/                        # Terraform / cloud infra templates
+├── scripts/                      # helper scripts (local dev, data pulls)
+├── notebooks/                    # exploratory and reproducible notebooks
+├── data/                         # small sample data & schema (NOT prod data)
+│   ├── raw_sample.csv
+│   └── schema.yaml
+├── src/
+│   ├── ingestion/                # data ingestion pipelines
+│   │   ├── __init__.py
+│   │   ├── fetch_raw.py
+│   │   ├── validators.py
+│   │   └── transform_initial.py
+│   ├── preprocessing/            # transforms & feature engineering
+│   │   ├── __init__.py
+│   │   ├── preprocess.py         # main preprocessing pipeline
+│   │   ├── imputers.py
+│   │   ├── encoders.py
+│   │   └── feature_store_client.py
+│   ├── features/                 # feature engineering definitions (feature store code)
+│   │   ├── feature_defs.py
+│   │   └── compute_features.py
+│   ├── training/                 # model training & experiments
+│   │   ├── __init__.py
+│   │   ├── train.py
+│   │   ├── cv.py
+│   │   ├── hyperparam_search.py
+│   │   ├── metrics.py
+│   │   └── model_utils.py
+│   ├── inference/                # production inference code
+│   │   ├── __init__.py
+│   │   ├── predict.py
+│   │   ├── scorer.py             # probability calibration & thresholding
+│   │   └── explain.py            # SHAP wrappers / local explanations
+│   ├── api/                      # model-serving API
+│   │   ├── app.py                # FastAPI app
+│   │   ├── routes/
+│   │   │   ├── score.py
+│   │   │   └── health.py
+│   │   ├── schemas.py            # pydantic request/response models
+│   │   └── logger.py
+│   ├── decisioning/              # business rules & manual review logic
+│   │   ├── rules.py
+│   │   └── review_queue.py
+│   ├── monitoring/               # model/data drift & metrics collectors
+│   │   ├── drift_detector.py
+│   │   └── prometheus_client.py
+│   ├── jobs/                     # orchestration entry points (airflow/prefect tasks)
+│   │   └── schedule.py
+│   └── utils/
+│       ├── config.py             # centralized config loader
+│       ├── io.py                 # read/write helpers (S3, GCS, local)
+│       └── constants.py
+├── models/                       # serialized models & metadata (gitignored in prod)
+│   ├── production/
+│   └── experiments/
+├── mlflow/ or model_registry/    # artifacts/registry metadata (or point to external)
+├── tests/
+│   ├── unit/
+│   │   ├── test_preprocess.py
+│   │   ├── test_train.py
+│   │   └── test_api.py
+│   └── integration/
+│       └── test_end_to_end.py
+├── docs/
+│   ├── architecture.md
+│   ├── data_dictionary.md
+│   ├── model_card.md
+│   └── runbook.md
+├── deployments/
+│   ├── docker/
+│   │   ├── Dockerfile.api
+│   │   └── Dockerfile.worker
+│   ├── helm/                     # optional helm charts
+│   └── aws/                      # cloud-specific deploy scripts
+├── ci/
+│   ├── pipeline.yml              # e.g., GitHub Actions / GitLab CI config
+│   └── build_and_test.sh
+├── monitoring_dashboards/        # Grafana / Kibana dashboard JSONs
+├── notebooks_reports/            # EDA & audit reports (exported PDFs)
+└── examples/                      # curl examples, sample requests, Postman collection
+    ├── sample_request.json
+    └── postman_collection.json
