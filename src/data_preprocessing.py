@@ -134,7 +134,7 @@ def main():
         elif "target" in df_raw.columns:
             target = df_raw["target"]
         else:
-            raise ValueError("❌ Target column not found in raw dataset.")
+            raise ValueError("Target column not found in raw dataset.")
 
         # 3. Apply cleaning + feature engineering
         df_features = apply_cleaning_and_feature_engineering(df_raw)
@@ -151,7 +151,7 @@ def main():
         df_processed.to_csv(save_path, index=False)
 
         logger.debug(f"Processed data saved at: {save_path}")
-        print("✔ Processed data created successfully.")
+        print("Processed data created successfully.")
 
     except Exception as e:
         logger.error(f"Data preprocessing failed: {e}")
@@ -161,3 +161,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
