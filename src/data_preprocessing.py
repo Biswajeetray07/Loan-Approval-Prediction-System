@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import logging
+import joblib
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
@@ -67,7 +68,7 @@ def apply_cleaning_and_feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def apply_preprocessing(df: pd.DataFrame) -> pd.DataFrame:
+def apply_preprocessing(df: pd.DataFrame, save_preprocessor_path: str = "artifacts/preprocessor.joblib") -> pd.DataFrame:
     logger.debug("Starting preprocessing...")
 
     numeric_features = [
@@ -88,6 +89,7 @@ def apply_preprocessing(df: pd.DataFrame) -> pd.DataFrame:
         ]
     )
 
+    # Fit the preprocessor and transform
     df_processed_np = preprocessor.fit_transform(df)
 
     # Column names
@@ -97,6 +99,11 @@ def apply_preprocessing(df: pd.DataFrame) -> pd.DataFrame:
 
     df_processed = pd.DataFrame(df_processed_np, columns=final_cols)
     logger.debug("Preprocessing completed.")
+
+    # ensure artifacts dir exists and save preprocessor
+    os.makedirs(os.path.dirname(save_preprocessor_path) or ".", exist_ok=True)
+    joblib.dump(preprocessor, save_preprocessor_path)
+    logger.debug(f"Saved preprocessor to: {save_preprocessor_path}")
 
     return df_processed
 
@@ -116,14 +123,40 @@ def main():
     try:
         raw_data_path = "data/raw/loan_data.csv"
         processed_data_dir = "data/processed"
+        preproc_artifact_path = "artifacts/preprocessor.joblib"
 
-        df = load_data(raw_data_path)
-        df = apply_cleaning_and_feature_engineering(df)
-        df_processed = apply_preprocessing(df)
-        save_processed_data(df_processed, processed_data_dir)
+        # 1. Load raw data
+        df_raw = load_data(raw_data_path)
+
+        # 2. Extract target column BEFORE preprocessing
+        if "loan_status" in df_raw.columns:
+            target = df_raw["loan_status"]              # if your target column is named loan_status
+        elif "target" in df_raw.columns:
+            target = df_raw["target"]
+        else:
+            raise ValueError("❌ Target column not found in raw dataset.")
+
+        # 3. Apply cleaning + feature engineering
+        df_features = apply_cleaning_and_feature_engineering(df_raw)
+
+        # 4. Apply preprocessing transform (scaler + OHE)
+        df_processed = apply_preprocessing(df_features, save_preprocessor_path=preproc_artifact_path)
+
+        # 5. Add the target column back
+        df_processed["target"] = target.values
+
+        # 6. Save processed file
+        os.makedirs(processed_data_dir, exist_ok=True)
+        save_path = os.path.join(processed_data_dir, "processed_loan_data.csv")
+        df_processed.to_csv(save_path, index=False)
+
+        logger.debug(f"Processed data saved at: {save_path}")
+        print("✔ Processed data created successfully.")
 
     except Exception as e:
         logger.error(f"Data preprocessing failed: {e}")
+        raise
+
 
 
 if __name__ == "__main__":
